@@ -1,7 +1,13 @@
+#define _GNU_SOURCE
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
- 
+#include <sys/types.h>
+ #include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+
+
  struct func_desc{
     char *name;
     void (*fun)();
@@ -30,6 +36,7 @@ void toggleDebugMode(){
 void setFileName(){
 	printf("Enter file name: \n");
 	fgets(filename,100,stdin);
+	strtok(filename,"\n");
 	if(debug_mode)
 		printf("Debug: file name set to: %s \n",filename);
 }
@@ -41,31 +48,72 @@ void setUnitSize(){
 	if(c == '1' || c == '2' || c == '4'){
 		size = c - '0';
 		if(debug_mode)
-			printf("Debug: size set to : %d",size);
+			printf("Debug: size set to : %d \n",size);
 	}
 	else{
 		printf("Number entered isn't valid!\n");
 	}
 }
 
+void fileDisplay(){
+	if(strcmp(filename,"") == 0){
+		printf("filename is empty \n");
+		return;
+	}
+	FILE* fd = fopen(filename,"r+b");
+	if(!fd ){
+		printf("failed to open file \n");
+		return;
+	}
+	
+	char str[100];
+	int location, length;
+	char* location_str;
+	printf("Please enter <location> <length>:\n");
+	fgets(str,100,stdin);
+	sscanf(str,"%s %d",location_str,&length);
+	location = strtol(location_str,NULL,16);
+	fseek(fd,location,SEEK_CUR);
+	if(debug_mode)
+		printf("location in decimal: %d length: %d\n",location,length);
+	size_t size_fixed = length*size;
+	int* buf = (int*)malloc(size_fixed);
+	fread(buf,(size_t)size,(size_t)length,fd);
+	int i;
+	printf("HexaDecimal Representation:\n");
+	for(i=0;i<length;i++){
+		printf("%hx ",*(buf + i));
+	}
+	printf("\n");
+
+	printf("Decimal Representation:\n");
+	for(i=0;i<length;i++){
+		printf("%d ",*(buf + i));
+	}
+	printf("\n");
+	free(buf);
+	fclose(fd);	
+}
+
+
 int main(int argc, char** argv){
     char c;
-    
-    struct func_desc menu[] = {{"0-Toggle Debug Mode", toggleDebugMode},{"1-Set File Name", setFileName},{"2-Set Unit Size", setUnitSize},{"3-Quit", quit},{NULL,NULL}};
+    char empty;
+    struct func_desc menu[] = {{"0-Toggle Debug Mode", toggleDebugMode},{"1-Set File Name", setFileName},{"2-Set Unit Size", setUnitSize},{"3-File Display",fileDisplay},{"4-Quit", quit},{NULL,NULL}};
     while(1){
     	if(debug_mode){
     		printf("Unit size: %d \nFilename: %s \nData address: %s \n",size,filename,data_pointer);
     	}
 
         printf("Please choose a function: \n");
-        for(int i = 0; i < 4 ; i++){
+        for(int i = 0; i < 5; i++){
             printf("%s \n",menu[i].name);
         }
-        printf("Option: ");
-    
+    	
         c = fgetc(stdin);
-        fgetc(stdin);
-        if( c >= '0' && c <= '3'){
+        empty = fgetc(stdin);
+        while (empty != EOF && empty != '\n'){empty = fgetc(stdin);}
+        if( c >= '0' && c <= '4'){
             menu[c - '0'].fun();
         }
         else{
