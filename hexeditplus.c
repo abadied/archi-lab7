@@ -84,22 +84,22 @@ void fileDisplay(){
 	printf("HexaDecimal Representation:\n");
 	for(i=0;i<length;i++){
 		if(size == 1)
-			printf("%hx ",*((char*)buf + i));
+			printf("%04hx ",*((char*)buf + i));
 		else if(size == 2)
-			printf("%hx ",*((short*)buf + i));
+			printf("%04hx ",*((short*)buf + i));
 		else
-			printf("%hx ",*((int*)buf + i));
+			printf("%04hx ",*((int*)buf + i));
 	}
 	printf("\n");
 
 	printf("Decimal Representation:\n");
 	for(i=0;i<length;i++){
 		if(size == 1)
-			printf("%u ",*((char*)buf + i));
+			printf("%hu ",*((char*)buf + i));
 		else if(size == 2)
-			printf("%u ",*((short*)buf + i));
+			printf("%hu ",*((short*)buf + i));
 		else
-			printf("%u ",*((int*)buf + i));
+			printf("%hu ",*((int*)buf + i));
 	}
 	printf("\n");
 	free(buf);
