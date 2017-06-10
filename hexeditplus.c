@@ -77,18 +77,29 @@ void fileDisplay(){
 	if(debug_mode)
 		printf("location in decimal: %d length: %d\n",location,length);
 	size_t size_fixed = length*size;
-	int* buf = (int*)malloc(size_fixed);
+	void* buf = malloc(size_fixed);
 	fread(buf,(size_t)size,(size_t)length,fd);
+	
 	int i;
 	printf("HexaDecimal Representation:\n");
 	for(i=0;i<length;i++){
-		printf("%hx ",*(buf + i));
+		if(size == 1)
+			printf("%hx ",*((char*)buf + i));
+		else if(size == 2)
+			printf("%hx ",*((short*)buf + i));
+		else
+			printf("%hx ",*((int*)buf + i));
 	}
 	printf("\n");
 
 	printf("Decimal Representation:\n");
 	for(i=0;i<length;i++){
-		printf("%d ",*(buf + i));
+		if(size == 1)
+			printf("%u ",*((char*)buf + i));
+		else if(size == 2)
+			printf("%u ",*((short*)buf + i));
+		else
+			printf("%u ",*((int*)buf + i));
 	}
 	printf("\n");
 	free(buf);
