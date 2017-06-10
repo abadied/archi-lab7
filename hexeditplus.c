@@ -106,25 +106,52 @@ void fileDisplay(){
 	fclose(fd);	
 }
 
+void loadIntoMemory(){
+	if(strcmp(filename,"") == 0){
+		printf("filename is empty \n");
+		return;
+	}
+	FILE* fd = fopen(filename,"r+b");
+	if(!fd ){
+		printf("failed to open file \n");
+		return;
+	}
+	char str[100];
+	int location, length;
+	char* location_str;
+	printf("Please enter <location> <length>:\n");
+	fgets(str,100,stdin);
+	sscanf(str,"%s %d",location_str,&length);
+	location = strtol(location_str,NULL,16);
+	if(data_pointer)
+		free(data_pointer);
+	fseek(fd,location,SEEK_CUR);
+	data_pointer = (char*)malloc((size_t)length);
+	if(debug_mode)
+		printf("Filename: %s location in decimal: %d length: %d\n",filename,location,length);
+	fread(data_pointer,1,(size_t)length,fd);
+	printf("Loaded %d bytes into %p \n",length,data_pointer);
+	fclose(fd);
+}
 
 int main(int argc, char** argv){
     char c;
     char empty;
-    struct func_desc menu[] = {{"0-Toggle Debug Mode", toggleDebugMode},{"1-Set File Name", setFileName},{"2-Set Unit Size", setUnitSize},{"3-File Display",fileDisplay},{"4-Quit", quit},{NULL,NULL}};
+    struct func_desc menu[] = {{"0-Toggle Debug Mode", toggleDebugMode},{"1-Set File Name", setFileName},{"2-Set Unit Size", setUnitSize},{"3-File Display",fileDisplay},{"4-Load Into Memory",loadIntoMemory},{"5-Quit", quit},{NULL,NULL}};
     while(1){
     	if(debug_mode){
-    		printf("Unit size: %d \nFilename: %s \nData address: %s \n",size,filename,data_pointer);
+    		printf("Unit size: %d \nFilename: %s \nData address: %p \n",size,filename,data_pointer);
     	}
 
         printf("Please choose a function: \n");
-        for(int i = 0; i < 5; i++){
+        for(int i = 0; i < 6; i++){
             printf("%s \n",menu[i].name);
         }
     	
         c = fgetc(stdin);
         empty = fgetc(stdin);
         while (empty != EOF && empty != '\n'){empty = fgetc(stdin);}
-        if( c >= '0' && c <= '4'){
+        if( c >= '0' && c <= '5'){
             menu[c - '0'].fun();
         }
         else{
