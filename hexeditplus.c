@@ -134,24 +134,78 @@ void loadIntoMemory(){
 	fclose(fd);
 }
 
+void saveIntoFile(){
+	if(strcmp(filename,"") == 0){
+		printf("filename is empty \n");
+		return;
+	}
+	FILE* fd = fopen(filename,"w+");
+	if(!fd ){
+		printf("failed to open file \n");
+		return;
+	}
+	char str[100];
+	int location, length;
+	char* location_str;
+	char* source_address;
+	printf("Please enter <source-address> <target-location> <length>:\n");
+	fgets(str,100,stdin);
+	sscanf(str,"%s %s %d",source_address,location_str,&length);
+	location = strtol(location_str,NULL,16);
+	if(data_pointer) /*check if location is bigger the filename size*/
+		printf("change me \n");
+	fseek(fd,location,SEEK_CUR);
+	if(strcmp(source_address,"0") == 0)
+		fwrite(data_pointer,1,(size_t)length,fd);
+	else{
+		fwrite(source_address,1,(size_t)length,fd);
+	}
+	fclose(fd);
+}
+
+void fileModify(){
+	if(strcmp(filename,"") == 0){
+		printf("filename is empty \n");
+		return;
+	}
+	FILE* fd = fopen(filename,"w+");
+	if(!fd ){
+		printf("failed to open file \n");
+		return;
+	}
+	char str[100];
+	int location; 
+	char* val;
+	char* location_str;
+	printf("Please enter <location> <val>:\n");
+	fgets(str,100,stdin);
+	sscanf(str,"%s %s",location_str,val);
+	location = strtol(location_str,NULL,16);
+	if(debug_mode) 
+		printf("Location: %s Val: %s \n",location_str,val);
+	fseek(fd,location,SEEK_CUR);
+	fwrite(val,1,(size_t)(strlen(val)),fd);
+	fclose(fd);
+}
+
 int main(int argc, char** argv){
     char c;
     char empty;
-    struct func_desc menu[] = {{"0-Toggle Debug Mode", toggleDebugMode},{"1-Set File Name", setFileName},{"2-Set Unit Size", setUnitSize},{"3-File Display",fileDisplay},{"4-Load Into Memory",loadIntoMemory},{"5-Quit", quit},{NULL,NULL}};
+    struct func_desc menu[] = {{"0-Toggle Debug Mode", toggleDebugMode},{"1-Set File Name", setFileName},{"2-Set Unit Size", setUnitSize},{"3-File Display",fileDisplay},{"4-Load Into Memory",loadIntoMemory},{"5-Save Into File",saveIntoFile},{"6- File Modify",fileModify},{"7-Quit", quit},{NULL,NULL}};
     while(1){
     	if(debug_mode){
     		printf("Unit size: %d \nFilename: %s \nData address: %p \n",size,filename,data_pointer);
     	}
 
         printf("Please choose a function: \n");
-        for(int i = 0; i < 6; i++){
+        for(int i = 0; i < 8; i++){
             printf("%s \n",menu[i].name);
         }
     	
         c = fgetc(stdin);
         empty = fgetc(stdin);
         while (empty != EOF && empty != '\n'){empty = fgetc(stdin);}
-        if( c >= '0' && c <= '5'){
+        if( c >= '0' && c <= '7'){
             menu[c - '0'].fun();
         }
         else{
