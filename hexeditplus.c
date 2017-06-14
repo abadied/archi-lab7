@@ -121,11 +121,12 @@ void loadIntoMemory(){
 	char* location_str;
 	printf("Please enter <location> <length>:\n");
 	fgets(str,100,stdin);
+	char* sup;
 	sscanf(str,"%s %d",location_str,&length);
 	location = strtol(location_str,NULL,16);
 	if(data_pointer)
 		free(data_pointer);
-	fseek(fd,location,SEEK_CUR);
+	fseek(fd,location,SEEK_SET);
 	data_pointer = (char*)malloc((size_t)length);
 	if(debug_mode)
 		printf("Filename: %s location in decimal: %d length: %d\n",filename,location,length);
@@ -139,26 +140,29 @@ void saveIntoFile(){
 		printf("filename is empty \n");
 		return;
 	}
-	FILE* fd = fopen(filename,"w+");
+	FILE* fd = fopen(filename,"r+");
 	if(!fd ){
 		printf("failed to open file \n");
 		return;
 	}
 	char str[100];
 	int location, length;
-	char* location_str;
-	char* source_address;
+	char location_str[8];
+	char source_address[8];
 	printf("Please enter <source-address> <target-location> <length>:\n");
 	fgets(str,100,stdin);
 	sscanf(str,"%s %s %d",source_address,location_str,&length);
 	location = strtol(location_str,NULL,16);
+	int sourcelocation = strtol(source_address, NULL, 16);
 	if(data_pointer) /*check if location is bigger the filename size*/
 		printf("change me \n");
-	fseek(fd,location,SEEK_CUR);
-	if(strcmp(source_address,"0") == 0)
+	
+	fseek(fd,location,SEEK_SET);
+	if(strcmp(source_address,"0") == 0){
+		printf("%s\n",source_address);
 		fwrite(data_pointer,1,(size_t)length,fd);
-	else{
-		fwrite(source_address,1,(size_t)length,fd);
+	}else{
+		fwrite(sourcelocation,1,(size_t)length,fd);
 	}
 	fclose(fd);
 }
@@ -168,23 +172,30 @@ void fileModify(){
 		printf("filename is empty \n");
 		return;
 	}
-	FILE* fd = fopen(filename,"w+");
+	FILE* fd = fopen(filename,"r+");
 	if(!fd ){
 		printf("failed to open file \n");
 		return;
 	}
 	char str[100];
 	int location; 
-	char* val;
-	char* location_str;
+	char val_str[16];
+	char location_str[8];
 	printf("Please enter <location> <val>:\n");
 	fgets(str,100,stdin);
-	sscanf(str,"%s %s",location_str,val);
+	sscanf(str,"%s %s",location_str,val_str);
 	location = strtol(location_str,NULL,16);
+	printf("%d", location);
+	char val[4];
+	int i;
+	for (i=0; i<size; i++){
+		sscanf(&val_str[i*2], "%02x", &val[i]);
+	}
 	if(debug_mode) 
-		printf("Location: %s Val: %s \n",location_str,val);
-	fseek(fd,location,SEEK_CUR);
-	fwrite(val,1,(size_t)(strlen(val)),fd);
+		printf("Location: %s Val: %s \n",location_str,val_str);
+	fseek(fd,location,SEEK_SET);
+	printf("%d", location);
+	fwrite(val,1,(size_t)size,fd);
 	fclose(fd);
 }
 
